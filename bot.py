@@ -31,13 +31,11 @@ def send_group_message():
     data = request.get_json()
     print(data)
     games = data.get("data")
-    print(games)
-    message = "Teve gol!"
+    message = "Atualização de placar!"
     if not games:
         message += "Digite /jogos para ver resultados ao vivo"
     else:
         message += " " + str(format_games(games))
-    print(message)
     try:
         for chat_id in interacted_chat_ids:
             print(chat_id, message)
