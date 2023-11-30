@@ -53,6 +53,17 @@ bot = Client(
         bot_token=getenv('BOT_TOKEN')
     )
 
+@bot.on_message(filters.command('projeto'))
+async def projeto(client, message):
+    inline_markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton('URL 🔗', url='https://github.com/joaowinderfeldbussolotto/brasileirao-telegram-bot.git')
+            ]
+        ]
+    )
+    await message.reply('Projeto no gitHub', reply_markup=inline_markup)
+
 @bot.on_message(filters.command("jogos"))
 def jogos_command(client, message):
     message.reply_text(get_live_games())
@@ -62,33 +73,36 @@ def jogos_command(client, message):
 def tabela_command(client, message):
     message.reply_text(get_standings())
 
+
+menu_markup = InlineKeyboardMarkup(
+    [
+        [
+            InlineKeyboardButton("Jogos Ao Vivo", callback_data="ver_jogos"),
+            InlineKeyboardButton("Ver Tabela", callback_data="ver_tabela"),
+        ]
+    ]
+)
+
+
+
 @bot.on_message()
 def start_command(client, message):
     chat_id = message.chat.id
     interacted_chat_ids.add(chat_id)
     with open(chat_ids_file, 'w') as file:
         json.dump(list(interacted_chat_ids), file)
-    menu_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("Jogos Ao Vivo", callback_data="ver_jogos"),
-                InlineKeyboardButton("Ver Tabela", callback_data="ver_tabela"),
-            ]
-        ]
-    )
 
-    message.reply_text("Bem-vindo ao Bot! Escolha uma opção:", reply_markup=menu_markup)
+
+    message.reply_text('Bem-vindo ao Bot do Brasileirão!\n'
+                    'Digite **/start** para iniciar o bot! 🤖\n'
+                    'Digite **/jogos** para ver os jogos ao vivo\n'
+                    'Digite **/tabela** para ver a tabela do campeonato\n'
+                    'Digite **/projeto** para ver o projeto no GitHub 💻\n'
+                    'Digite qualquer outra coisa para ver o menu de opções\n'
+                    'Escolha uma opção:', reply_markup=menu_markup)
 
 @bot.on_callback_query()
 def callback_query_handler(client, query):
-    menu_markup = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton("Ver Jogos Ao Vivo", callback_data="ver_jogos"),
-            InlineKeyboardButton("Ver Tabela", callback_data="ver_tabela"),
-        ]
-    ]
-    )
     if query.data == "ver_jogos":
         client.edit_message_text(
             chat_id=query.message.chat.id,
@@ -100,7 +114,7 @@ def callback_query_handler(client, query):
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             text=get_standings()
-        )
+        )        
     else:
         client.edit_message_text(
             chat_id=query.message.chat.id,
