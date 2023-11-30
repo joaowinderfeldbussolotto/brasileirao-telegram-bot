@@ -1,6 +1,9 @@
 blinker==1.7.0
+certifi==2023.11.17
+charset-normalizer==3.3.2
 click==8.1.7
 flask==3.0.0
+idna==3.6
 importlib-metadata==6.8.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
@@ -9,5 +12,7 @@ pyaes==1.6.1
 Pyrogram==2.0.106
 PySocks==1.7.1
 python-dotenv==1.0.0
+requests==2.31.0
+urllib3==2.1.0
 werkzeug==3.0.1
 zipp==3.17.0
