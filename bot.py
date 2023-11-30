@@ -103,25 +103,25 @@ def start_command(client, message):
 
 @bot.on_callback_query()
 def callback_query_handler(client, query):
+    chat_id = query.message.chat.id
+
     if query.data == "ver_jogos":
-        client.edit_message_text(
-            chat_id=query.message.chat.id,
-            message_id=query.message.id,
+        client.send_message(
+            chat_id=chat_id,
             text=get_live_games()
         )
     elif query.data == "ver_tabela":
-        client.edit_message_text(
-            chat_id=query.message.chat.id,
-            message_id=query.message.id,
+        client.send_message(
+            chat_id=chat_id,
             text=get_standings()
         )        
     else:
-        client.edit_message_text(
-            chat_id=query.message.chat.id,
-            message_id=query.message.id,
+        client.send_message(
+            chat_id=chat_id,
             text="Opção não reconhecida. Escolha uma opção válida:",
             reply_markup=menu_markup,
         )
+
 
 bot.start()
 threading.Thread(target=api.run, daemon=True).start()
