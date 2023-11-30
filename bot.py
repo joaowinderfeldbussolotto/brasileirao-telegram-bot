@@ -5,7 +5,7 @@ from pyrogram import Client, idle, filters
 from os import getenv
 from dotenv import load_dotenv
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from actions import get_live_games, get_standings
+from actions import get_live_games, get_standings, format_games
 import json
 
 load_dotenv()
@@ -29,11 +29,19 @@ def hello_world():
 @api.route("/send_message", methods=["POST"])
 def send_group_message():
     data = request.get_json()
-    message_text = data.get("message", "Teve gol! Digite /jogos")
+    print(data)
+    games = data.get("data")
+    print(games)
+    message = "Teve gol!"
+    if not games:
+        message += "Digite /jogos para ver resultados ao vivo"
+    else:
+        message += " " + str(format_games(games))
+    print(message)
     try:
-        
         for chat_id in interacted_chat_ids:
-            bot.send_message(chat_id, text=message_text)
+            print(chat_id, message)
+            bot.send_message(chat_id, text=message)
         return "Message sent to the group!"
     except Exception as e:
         return f"Error sending message: {str(e)}"

@@ -16,6 +16,9 @@ def get_live_games():
     response = requests.get(api_endpoint)
     data = response.json()
     if response.status_code == 200:
+        if not data:
+            return "Sem jogos ao vivo agora!"
+
         games = format_games(data)
         return games
     return "Algo deu errado"
