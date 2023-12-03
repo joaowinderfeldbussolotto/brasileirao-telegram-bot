@@ -1,35 +1,38 @@
 import threading
 
-from flask import Flask, request
 from pyrogram import Client, idle, filters
 from os import getenv
 from dotenv import load_dotenv
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from actions import get_live_games, get_standings, format_games
 import json
+import pika
+import json
 
 load_dotenv()
 
-api = Flask(__name__)
 
 chat_ids_file = 'chat_ids.json'
 
-# Load existing chat IDs from the file
 try:
     with open(chat_ids_file, 'r') as file:
         interacted_chat_ids = set(json.load(file))
 except FileNotFoundError:
     interacted_chat_ids = set()
 
-@api.route("/")
-def hello_world():
-    return "Nice"
 
 
-@api.route("/send_message", methods=["POST"])
-def send_group_message():
-    data = request.get_json()
-    print(data)
+server = getenv("SERVER")
+queue = getenv("QUEUE")
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(server))
+channel = connection.channel()
+channel.queue_declare(queue)
+
+
+
+def callback(ch, method, properties, body):
+    data = json.loads(body)
     games = data.get("data")
     message = "Atualização de placar!"
     if not games:
@@ -40,9 +43,14 @@ def send_group_message():
         for chat_id in interacted_chat_ids:
             print(chat_id, message)
             bot.send_message(chat_id, text=message)
-        return "Message sent to the group!"
     except Exception as e:
-        return f"Error sending message: {str(e)}"
+        message += "Digite /jogos para ver resultados ao vivo"
+channel.basic_consume(queue=queue, on_message_callback=callback, auto_ack=True)
+
+
+
+def start_consuming():
+    channel.start_consuming()
 
 bot = Client(
         'tester',
@@ -121,7 +129,8 @@ def callback_query_handler(client, query):
         )
 
 
+
 bot.start()
-threading.Thread(target=api.run, daemon=True).start()
+threading.Thread(target=start_consuming, daemon=True).start()
 idle()
 bot.stop()
